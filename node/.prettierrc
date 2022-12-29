@@ -1,0 +1,7 @@
+{
+  "singleQuote": true,
+  "attributeGroups": ["$CODE_GUIDE"],
+  "attributeSort": "ASC",
+  "printWidth": 120,
+  "htmlWhitespaceSensitivity": "css"
+}
