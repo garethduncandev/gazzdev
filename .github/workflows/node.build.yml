@@ -38,6 +38,8 @@ jobs:
     - name: Check package.json version
       id: cpv
       uses: PostHog/check-package-version@v2
+      with:
+        path: ./node
 
     - name: Echo versions
       run: |
