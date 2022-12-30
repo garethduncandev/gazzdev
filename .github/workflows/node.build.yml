@@ -46,9 +46,13 @@ jobs:
           echo "Committed version: ${{ steps.cpv.outputs.committed-version }}"
           echo "Published version: ${{ steps.cpv.outputs.published-version }}"
 
+    - name: Validate package.json version
+      if: steps.cpv.outputs.is-new-version != 'true'
+      run: |
+        echo package.json version already exists in npm registry
+        exit 1
+
     - uses: actions/upload-artifact@v3
-      if: steps.cpv.outputs.is-new-version == 'true'
       with:
-        working-directory: nodes
-        name: gazzdev-${{ steps.cpv.outputs.committed-version }}
-        path: gazzdev-${{ steps.cpv.outputs.committed-version }}.tgz
+        name: gazzdev-${{ steps.cpv.outputs.committed-version }}_${{ github.run_number }}.tgz
+        path: ./node/gazzdev-${{ steps.cpv.outputs.committed-version }}.tgz
