@@ -1,0 +1,48 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  version: ${{ github.run_number }}
+
+defaults:
+  run:
+    working-directory: node
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Pack package - Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm pack
+
+    - name: Check package.json version
+      id: cpv
+      uses: PostHog/check-package-version@v2
+
+    - name: Echo versions
+      run: |
+          echo "Committed version: ${{ steps.cpv.outputs.committed-version }}"
+          echo "Published version: ${{ steps.cpv.outputs.published-version }}"
+
+    - uses: actions/upload-artifact@v3
+      if: steps.cpv.outputs.is-new-version == 'true'
+      with:
+        name: gazzdev-${{ steps.cpv.outputs.committed-version }}
+        path: gazzdev-${{ steps.cpv.outputs.committed-version }}.tgz
