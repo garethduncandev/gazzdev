@@ -17,6 +17,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    
 
     strategy:
       matrix:
@@ -29,6 +30,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: node/package-lock.json
     
     - name: pack
       run: npm ci && npm pack
