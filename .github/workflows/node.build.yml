@@ -54,5 +54,5 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: gazzdev-${{ steps.cpv.outputs.committed-version }}_${{ github.run_number }}.tgz
+        name: gazzdev-${{ steps.cpv.outputs.committed-version }}
         path: ./node/gazzdev-${{ steps.cpv.outputs.committed-version }}.tgz
