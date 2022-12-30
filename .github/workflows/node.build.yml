@@ -45,9 +45,10 @@ jobs:
       run: |
           echo "Committed version: ${{ steps.cpv.outputs.committed-version }}"
           echo "Published version: ${{ steps.cpv.outputs.published-version }}"
+          echo "Is new version: ${{ steps.cpv.outputs.is-new-version }}"
 
     - name: Validate package.json version
-      if: steps.cpv.outputs.is-new-version != 'true'
+      if: steps.cpv.outputs.is-new-version == 'false'
       run: |
         echo package.json version already exists in npm registry
         exit 1
