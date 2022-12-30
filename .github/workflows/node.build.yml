@@ -24,22 +24,22 @@ jobs:
     - name: Pack package - Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
-        working-directory: nodes
+        working-directory: ./node
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     
     - name: pack
-      working-directory: nodes
+      working-directory: ./node
       run: npm ci && npm pack
 
     - name: Check package.json version
       id: cpv
       uses: PostHog/check-package-version@v2
       with:
-        working-directory: nodes
+        working-directory: ./node
 
     - name: Echo versions
-      working-directory: nodes
+      working-directory: ./node
       run: |
           echo "Committed version: ${{ steps.cpv.outputs.committed-version }}"
           echo "Published version: ${{ steps.cpv.outputs.published-version }}"
