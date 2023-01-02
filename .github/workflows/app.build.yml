@@ -39,7 +39,7 @@ jobs:
           echo "Committed version: ${{ steps.json_properties.outputs.version }}"
 
     - name: Apply version to appsettings
-      working-directory: src/app/dist/blurdle/assets/appsettings
+      working-directory: src/app
       run: find -name ".env.*" -exec sed -i "s/***REPLACE_VERSION***/${{ steps.json_properties.outputs.version }}.${{ github.run_number }}/g" {} +
 
     - name: build app
