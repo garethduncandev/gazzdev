@@ -1,10 +1,19 @@
 {
   "folders": [
     {
-      "path": "node"
+      "path": ".github/workflows"
     },
     {
-      "path": ".github/workflows"
+      "path": "src/app"
+    },
+    {
+      "path": "src/cdk"
+    },
+    {
+      "path": "src/node"
+    },
+    {
+      "path": "src/webcomponents"
     }
   ],
   "settings": {}

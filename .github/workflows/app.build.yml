@@ -1,0 +1,46 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  version: ${{ github.run_number }}
+
+defaults:
+ run:
+  working-directory: ./node
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Pack package - Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: node/package-lock.json
+    
+    - name: install
+      run: npm ci
+
+    - name: build app
+      if: steps.cpv.outputs.is-new-version == 'false'
+      run: |
+        echo package.json version already exists in npm registry
+        exit 1
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: gazzdev-${{ steps.cpv.outputs.committed-version }}
+        path: ./node/gazzdev-${{ steps.cpv.outputs.committed-version }}.tgz
