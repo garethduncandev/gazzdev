@@ -6,15 +6,8 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  version: ${{ github.run_number }}
-
-defaults:
- run:
-  working-directory: ./node
-
 jobs:
-  build:
+  build-app:
 
     runs-on: ubuntu-latest
     
@@ -34,13 +27,24 @@ jobs:
     - name: install
       run: npm ci
 
-    - name: build app
-      if: steps.cpv.outputs.is-new-version == 'false'
+    - name: get properties
+      id: json_properties
+      uses: zoexx/github-action-json-file-properties@release
+      with:
+        file_path: "src/app/package.json"
+
+    - name: Echo package version
       run: |
-        echo package.json version already exists in npm registry
-        exit 1
+          echo "Committed version: ${{ steps.json_properties.outputs.version }}"
+
+    - name: Apply version to appsettings
+      working-directory: src/app/dist/blurdle/assets/appsettings
+      run: find -name ".env.*" -exec sed -i "s/***REPLACE_VERSION***/${{ steps.json_properties.outputs.version }}.${{ github.run_number }}/g" {} +
+
+    - name: build app
+      run: npm run build
 
     - uses: actions/upload-artifact@v3
       with:
-        name: gazzdev-${{ steps.cpv.outputs.committed-version }}
-        path: ./node/gazzdev-${{ steps.cpv.outputs.committed-version }}.tgz
+        name: gazzdev-${{ steps.json_properties.outputs.version }}.${{ github.run_number }}
+        path: ./src/app/build
