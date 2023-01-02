@@ -22,10 +22,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: node/package-lock.json
+        cache-dependency-path: src/app/package-lock.json
     
     - name: install
       run: npm ci
+      working-directory: src/app
 
     - name: get properties
       id: json_properties
@@ -43,6 +44,7 @@ jobs:
 
     - name: build app
       run: npm run build
+      working-directory: src/app
 
     - uses: actions/upload-artifact@v3
       with:
