@@ -3,8 +3,6 @@ name: gazzdev build
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'src/app/**'
 
 jobs:
   build-app:
