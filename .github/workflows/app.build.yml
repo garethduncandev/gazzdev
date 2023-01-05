@@ -1,4 +1,4 @@
-name: Node.js CI
+name: gazzdev app & api build
 
 on:
   push:
@@ -38,9 +38,11 @@ jobs:
       run: |
           echo "Committed version: ${{ steps.json_properties.outputs.version }}"
 
-    - name: Apply version to appsettings
-      working-directory: src/app
-      run: find -name ".env.*" -exec sed -i "s/***REPLACE_VERSION***/${{ steps.json_properties.outputs.version }}.${{ github.run_number }}/g" {} +
+    - name: Create .env
+      working-directory: src/app     
+      run: |
+       echo PUBLIC_API_URL=***REPLACE_API_URL*** > .env
+       echo PUBLIC_VERSION=${{ steps.json_properties.outputs.version }}.${{ github.run_number }}
 
     - name: build app
       run: npm run build
