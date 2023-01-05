@@ -2,17 +2,17 @@
 	import type { LayoutData } from './$types';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import type { AppSettings } from 'src/models/appsettings';
+	import type { AppSettings } from 'src/models/appsettings.model';
 	export let data: LayoutData;
 
-	let appsettings = data['appSettings'] as AppSettings;
+	let appsettings = data['appSettings'] satisfies AppSettings;
 	const version = appsettings.version;
 </script>
 
 <Header {version} />
 
 <svelte:head>
-	<title>gazzdev</title>
+	<title>gazz.dev</title>
 </svelte:head>
 
 <main>
