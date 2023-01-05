@@ -2,51 +2,52 @@ name: gazzdev build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+    paths:
+      - "src/app/**"
 
 jobs:
   build-app:
-
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [18.x]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Pack package - Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: src/app/package-lock.json
-    
-    - name: install
-      run: npm ci
-      working-directory: src/app
+      - uses: actions/checkout@v3
+      - name: Pack package - Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: src/app/package-lock.json
 
-    - name: get properties
-      id: json_properties
-      uses: zoexx/github-action-json-file-properties@release
-      with:
-        file_path: "src/app/package.json"
+      - name: install
+        run: npm ci
+        working-directory: src/app
 
-    - name: Echo package version
-      run: |
+      - name: get properties
+        id: json_properties
+        uses: zoexx/github-action-json-file-properties@release
+        with:
+          file_path: "src/app/package.json"
+
+      - name: Echo package version
+        run: |
           echo "Committed version: ${{ steps.json_properties.outputs.version }}"
 
-    - name: Create .env
-      working-directory: src/app     
-      run: |
-       echo PUBLIC_API_URL=***REPLACE_API_URL*** > .env
-       echo PUBLIC_VERSION=${{ steps.json_properties.outputs.version }}.${{ github.run_number }} >> .env
+      - name: Create .env
+        working-directory: src/app
+        run: |
+          echo PUBLIC_API_URL=***REPLACE_API_URL*** > .env
+          echo PUBLIC_VERSION=${{ steps.json_properties.outputs.version }}.${{ github.run_number }} >> .env
 
-    - name: build app
-      run: npm run build
-      working-directory: src/app
+      - name: build app
+        run: npm run build
+        working-directory: src/app
 
-    - uses: actions/upload-artifact@v3
-      with:
-        name: gazzdev-${{ steps.json_properties.outputs.version }}.${{ github.run_number }}
-        path: ./src/app/build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: gazzdev-${{ steps.json_properties.outputs.version }}.${{ github.run_number }}
+          path: ./src/app/build
