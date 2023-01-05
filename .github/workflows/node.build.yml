@@ -3,8 +3,12 @@ name: gazzdev node npm package build
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - node/**
   pull_request:
     branches: [ "main" ]
+    paths:
+      - node/**
 
 defaults:
  run:

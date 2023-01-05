@@ -3,8 +3,12 @@ name: gazzdev app & api build
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - app/**
   pull_request:
     branches: [ "main" ]
+    paths:
+      - app/**
 
 jobs:
   build-app:
@@ -42,7 +46,7 @@ jobs:
       working-directory: src/app     
       run: |
        echo PUBLIC_API_URL=***REPLACE_API_URL*** > .env
-       echo PUBLIC_VERSION=${{ steps.json_properties.outputs.version }}.${{ github.run_number }}
+       echo PUBLIC_VERSION=${{ steps.json_properties.outputs.version }}.${{ github.run_number }} >> .env
 
     - name: build app
       run: npm run build
