@@ -3,12 +3,10 @@ name: gazzdev app & api build
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'src/app/**'
+    paths: ['src/app/**']
   pull_request:
     branches: [ "main" ]
-    paths:
-      - 'src/app/**'
+    paths: ['src/app/**']
 
 jobs:
   build-app:
