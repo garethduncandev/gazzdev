@@ -4,11 +4,11 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - node/**
+      - 'node/**'
   pull_request:
     branches: [ "main" ]
     paths:
-      - node/**
+      - 'node/**'
 
 defaults:
  run:
