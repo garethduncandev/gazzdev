@@ -1,5 +1,5 @@
 export class GazzDev {
   public readme(): string {
-    return 'Hi there, this is gazzdev';
+    return 'Hello, this is gazzdev';
   }
 }
