@@ -1,39 +1,62 @@
-import * as cdk from 'aws-cdk-lib';
-import { RemovalPolicy, StackProps } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-import { AppStack } from './app-stack';
+import * as cdk from "aws-cdk-lib";
+import { NestedStackProps, RemovalPolicy, StackProps } from "aws-cdk-lib";
+import {
+  BlockPublicAccess,
+  Bucket,
+  HttpMethods,
+  IBucket,
+} from "aws-cdk-lib/aws-s3";
+import { Construct } from "constructs";
+import { AppStack } from "./app-stack";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export interface RootStackProps extends StackProps {
   environment: string;
+  color: string;
   domain: string;
   hostedZoneId: string;
   region: string;
   cloudFrontDomainCertificateArn: string;
-  apiDefaultMemoryAllocation: number;
-  apiTimeout: number;
   appName: string;
-  //   cors: {
-  //     allowOrigins: string[];
-  //     allowHeaders: string[] | undefined;
-  //     allowedMethods: string[];
-  //   };
   removalPolicy: RemovalPolicy;
+  bucketName: string;
+}
+
+export interface RootNestedStackProps extends NestedStackProps {
+  rootStackProps: RootStackProps;
+  bucket: IBucket;
 }
 
 export class RootStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: RootStackProps) {
+  public constructor(scope: Construct, id: string, props: RootStackProps) {
     super(scope, id, props);
 
-    console.log('REGION 👉', process.env.REGION);
+    // for cloudfront hosting and any storage for the api
+    const bucket = this.createBucket(props.bucketName, props.removalPolicy);
 
-    // The code that defines your stack goes here
+    const rootNestedStackProps = {
+      bucket: bucket,
+      rootStackProps: props,
+    } as RootNestedStackProps;
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'GazzdevQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    new AppStack(this, `${id}-app`, rootNestedStackProps);
+  }
 
-    new AppStack(this, `${id}-app`, props);
+  private createBucket(
+    bucketName: string,
+    removalPolicy: RemovalPolicy
+  ): IBucket {
+    return new Bucket(this, `${bucketName}-bucket`, {
+      removalPolicy: removalPolicy,
+      bucketName: bucketName,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      cors: [
+        {
+          allowedMethods: [HttpMethods.GET],
+          allowedOrigins: ["*"],
+          allowedHeaders: ["*"],
+        },
+      ],
+    });
   }
 }
