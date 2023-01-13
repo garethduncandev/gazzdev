@@ -14,6 +14,10 @@ const stackName = `${process.env.CDK_APP_NAME ?? ''}-${
   process.env.CDK_ENVIRONMENT ?? ''
 }-${process.env.CDK_ENVIRONMENT_COLOR ?? ''}`;
 
+const absoluteDomainName =
+  process.env.CDK_ABSOLUTE_DOMAIN ??
+  `${process.env.CDK_ENVIRONMENT}-${process.env.CDK_ENVIRONMENT_COLOR}.${process.env.CDK_DOMAIN}`;
+
 const rootStackProps: EnvironmentStackProps = {
   environment: process.env.CDK_ENVIRONMENT ?? '',
   color: process.env.CDK_ENVIRONMENT_COLOR ?? '',
@@ -32,6 +36,7 @@ const rootStackProps: EnvironmentStackProps = {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
+  absoluteDomainName: absoluteDomainName,
 };
 
 new RootStack(app, stackName, rootStackProps);

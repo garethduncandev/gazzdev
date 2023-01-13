@@ -37,7 +37,7 @@ export class AppStack extends NestedStack {
 
     const cloudFrontDistribution = this.cloudFrontDistribution(
       stackName,
-      props.environmentStackProps.domain,
+      props.environmentStackProps.absoluteDomainName,
       cloudFrontDomainCertificate,
       originAccessIdentity,
       props.bucket
@@ -56,7 +56,7 @@ export class AppStack extends NestedStack {
       this,
       stackName,
       props.hostedZone,
-      props.environmentStackProps.domain,
+      props.environmentStackProps.absoluteDomainName,
       cloudFrontDistribution
     );
 
@@ -65,12 +65,12 @@ export class AppStack extends NestedStack {
 
   private cloudFrontDistribution(
     stackName: string,
-    domain: string,
+    absoluteDomainName: string,
     cloudFrontDomainCertificate: ICertificate,
     originAccessIdentity: OriginAccessIdentity,
     bucket: IBucket
   ): Distribution {
-    const domainNames: string[] = [domain];
+    const absoluteDomainNames: string[] = [absoluteDomainName];
 
     const distibution = new Distribution(this, `${stackName}-distibution`, {
       defaultBehavior: {
@@ -85,7 +85,7 @@ export class AppStack extends NestedStack {
         responseHeadersPolicy:
           ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
       },
-      domainNames: domainNames,
+      domainNames: absoluteDomainNames,
 
       certificate: cloudFrontDomainCertificate,
       defaultRootObject: 'index.html',

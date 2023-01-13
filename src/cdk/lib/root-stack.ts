@@ -22,6 +22,7 @@ export interface EnvironmentStackProps extends StackProps {
   appName: string;
   removalPolicy: RemovalPolicy;
   bucketName: string;
+  absoluteDomainName: string;
 }
 
 export interface RootNestedStackProps extends NestedStackProps {
