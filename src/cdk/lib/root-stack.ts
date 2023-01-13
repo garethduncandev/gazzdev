@@ -1,16 +1,18 @@
-import * as cdk from "aws-cdk-lib";
-import { NestedStackProps, RemovalPolicy, StackProps } from "aws-cdk-lib";
+import * as cdk from 'aws-cdk-lib';
+import { NestedStackProps, RemovalPolicy, StackProps } from 'aws-cdk-lib';
+import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import {
   BlockPublicAccess,
   Bucket,
   HttpMethods,
   IBucket,
-} from "aws-cdk-lib/aws-s3";
-import { Construct } from "constructs";
-import { AppStack } from "./app-stack";
+} from 'aws-cdk-lib/aws-s3';
+import { Construct } from 'constructs';
+import { AppStack } from './app-stack';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
-export interface RootStackProps extends StackProps {
+// Mapped to .env
+export interface EnvironmentStackProps extends StackProps {
   environment: string;
   color: string;
   domain: string;
@@ -23,23 +25,31 @@ export interface RootStackProps extends StackProps {
 }
 
 export interface RootNestedStackProps extends NestedStackProps {
-  rootStackProps: RootStackProps;
+  environmentStackProps: EnvironmentStackProps;
   bucket: IBucket;
+  hostedZone: IHostedZone;
 }
 
 export class RootStack extends cdk.Stack {
-  public constructor(scope: Construct, id: string, props: RootStackProps) {
-    super(scope, id, props);
+  public constructor(
+    scope: Construct,
+    stackName: string,
+    props: EnvironmentStackProps
+  ) {
+    super(scope, stackName, props);
+
+    const hostedZone = this.getHostedZone(props.hostedZoneId, props.domain);
 
     // for cloudfront hosting and any storage for the api
     const bucket = this.createBucket(props.bucketName, props.removalPolicy);
 
     const rootNestedStackProps = {
+      environmentStackProps: props,
       bucket: bucket,
-      rootStackProps: props,
+      hostedZone: hostedZone,
     } as RootNestedStackProps;
 
-    new AppStack(this, `${id}-app`, rootNestedStackProps);
+    new AppStack(this, `${stackName}-app`, rootNestedStackProps);
   }
 
   private createBucket(
@@ -53,10 +63,17 @@ export class RootStack extends cdk.Stack {
       cors: [
         {
           allowedMethods: [HttpMethods.GET],
-          allowedOrigins: ["*"],
-          allowedHeaders: ["*"],
+          allowedOrigins: ['*'],
+          allowedHeaders: ['*'],
         },
       ],
+    });
+  }
+
+  private getHostedZone(hostedZoneId: string, domain: string): IHostedZone {
+    return HostedZone.fromHostedZoneAttributes(this, 'Zone', {
+      hostedZoneId: hostedZoneId,
+      zoneName: domain,
     });
   }
 }

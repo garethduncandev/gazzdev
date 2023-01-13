@@ -1,5 +1,5 @@
-import { NestedStack } from "aws-cdk-lib";
-import { Certificate, ICertificate } from "aws-cdk-lib/aws-certificatemanager";
+import { NestedStack } from 'aws-cdk-lib';
+import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
   AllowedMethods,
   Distribution,
@@ -7,35 +7,37 @@ import {
   OriginRequestPolicy,
   ResponseHeadersPolicy,
   ViewerProtocolPolicy,
-} from "aws-cdk-lib/aws-cloudfront";
-import { S3Origin } from "aws-cdk-lib/aws-cloudfront-origins";
-import { IBucket } from "aws-cdk-lib/aws-s3";
-import { Construct } from "constructs";
-import { ExportHelper } from "./helpers/exports";
-import { OriginAccessIdentityHelper } from "./helpers/origin-access-identity";
-import { RootNestedStackProps } from "./root-stack";
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+} from 'aws-cdk-lib/aws-cloudfront';
+import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
+import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
+import { Construct } from 'constructs';
+import path = require('path');
+import { ExportHelper } from './helpers/exports';
+import { OriginAccessIdentityHelper } from './helpers/origin-access-identity';
+import { Route53Helper } from './helpers/route53';
+import { RootNestedStackProps } from './root-stack';
 
 export class AppStack extends NestedStack {
   public constructor(
     scope: Construct,
-    id: string,
+    stackName: string,
     props: RootNestedStackProps
   ) {
-    super(scope, id, props);
+    super(scope, stackName, props);
 
     // S3 bucket to host angular application, to be served up via cloudfront
     const cloudFrontDomainCertificate = this.cloudFrontDomainCertificate(
-      id,
-      props.rootStackProps.cloudFrontDomainCertificateArn
+      stackName,
+      props.environmentStackProps.cloudFrontDomainCertificateArn
     );
 
     const originAccessIdentity =
-      OriginAccessIdentityHelper.originAccessIdentity(this, id);
+      OriginAccessIdentityHelper.originAccessIdentity(this, stackName);
 
     const cloudFrontDistribution = this.cloudFrontDistribution(
-      id,
-      props.rootStackProps.domain,
+      stackName,
+      props.environmentStackProps.domain,
       cloudFrontDomainCertificate,
       originAccessIdentity,
       props.bucket
@@ -44,11 +46,21 @@ export class AppStack extends NestedStack {
     // So we can query this to invalidate if required
     ExportHelper.createExport(
       this,
-      id,
+      stackName,
       cloudFrontDistribution.distributionId,
-      "cloudfront distributionId",
-      "appCloudFrontDistributionId"
+      'cloudfront distributionId',
+      'appCloudFrontDistributionId'
     );
+
+    Route53Helper.cloudFrontDistributionRoute53ARecord(
+      this,
+      stackName,
+      props.hostedZone,
+      props.environmentStackProps.domain,
+      cloudFrontDistribution
+    );
+
+    this.appDeployment(props, props.bucket);
   }
 
   private cloudFrontDistribution(
@@ -76,17 +88,17 @@ export class AppStack extends NestedStack {
       domainNames: domainNames,
 
       certificate: cloudFrontDomainCertificate,
-      defaultRootObject: "index.html",
+      defaultRootObject: 'index.html',
       errorResponses: [
         {
           httpStatus: 403,
           responseHttpStatus: 200,
-          responsePagePath: "/index.html",
+          responsePagePath: '/index.html',
         },
         {
           httpStatus: 404,
           responseHttpStatus: 200,
-          responsePagePath: "/index.html",
+          responsePagePath: '/index.html',
         },
       ],
     });
@@ -104,6 +116,23 @@ export class AppStack extends NestedStack {
       this,
       `${stackName}-cloudfront-certificate`,
       cloudFrontDomainCertificateArn
+    );
+  }
+
+  private appDeployment(
+    props: RootNestedStackProps,
+    bucket: IBucket
+  ): BucketDeployment {
+    return new BucketDeployment(
+      this,
+      `${props.environmentStackProps.stackName}-app-bucket-deployment`,
+      {
+        sources: [Source.asset(path.join(__dirname, '../../app/build'))],
+        destinationKeyPrefix: `app`,
+        destinationBucket: bucket,
+        prune: true,
+        exclude: [],
+      }
     );
   }
 }

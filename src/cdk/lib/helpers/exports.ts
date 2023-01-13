@@ -1,5 +1,5 @@
-import { CfnOutput, Fn } from "aws-cdk-lib";
-import { Construct } from "constructs";
+import { CfnOutput, Fn } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 
 export class ExportHelper {
   public static createExport(

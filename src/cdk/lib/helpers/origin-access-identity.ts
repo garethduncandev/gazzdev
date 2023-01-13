@@ -1,5 +1,5 @@
-import { OriginAccessIdentity } from "aws-cdk-lib/aws-cloudfront";
-import { Construct } from "constructs";
+import { OriginAccessIdentity } from 'aws-cdk-lib/aws-cloudfront';
+import { Construct } from 'constructs';
 
 export class OriginAccessIdentityHelper {
   public static originAccessIdentity(
