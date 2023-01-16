@@ -16,5 +16,7 @@
       "path": "src/webcomponents"
     }
   ],
-  "settings": {}
+  "settings": {
+    "liveServer.settings.multiRootWorkspaceName": "app"
+  }
 }
