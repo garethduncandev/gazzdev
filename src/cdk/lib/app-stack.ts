@@ -5,18 +5,18 @@ import {
   Distribution,
   OriginAccessIdentity,
   OriginRequestPolicy,
-  ResponseHeadersPolicy,
   ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
-import path = require('path');
 import { ExportHelper } from './helpers/exports';
 import { OriginAccessIdentityHelper } from './helpers/origin-access-identity';
+import { ResponseHeadersPolicyHelper } from './helpers/reponse-headers-policy';
 import { Route53Helper } from './helpers/route53';
 import { RootNestedStackProps } from './root-stack';
+import path = require('path');
 
 export class AppStack extends NestedStack {
   public constructor(
@@ -40,7 +40,8 @@ export class AppStack extends NestedStack {
       props.environmentStackProps.absoluteDomainName,
       cloudFrontDomainCertificate,
       originAccessIdentity,
-      props.bucket
+      props.bucket,
+      props.environmentStackProps.robotsNoIndex
     );
 
     // So we can query this to invalidate if required
@@ -68,7 +69,8 @@ export class AppStack extends NestedStack {
     absoluteDomainName: string,
     cloudFrontDomainCertificate: ICertificate,
     originAccessIdentity: OriginAccessIdentity,
-    bucket: IBucket
+    bucket: IBucket,
+    noIndexing: boolean
   ): Distribution {
     const absoluteDomainNames: string[] = [absoluteDomainName];
 
@@ -78,12 +80,15 @@ export class AppStack extends NestedStack {
           originAccessIdentity: originAccessIdentity,
           originPath: `/app`,
         }),
-
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
         responseHeadersPolicy:
-          ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
+          ResponseHeadersPolicyHelper.getResponseHeaderPolicy(
+            this,
+            stackName,
+            noIndexing
+          ),
       },
       domainNames: absoluteDomainNames,
 

@@ -17,12 +17,12 @@ export interface EnvironmentStackProps extends StackProps {
   color: string;
   domain: string;
   hostedZoneId: string;
-  region: string;
   cloudFrontDomainCertificateArn: string;
   appName: string;
   removalPolicy: RemovalPolicy;
   bucketName: string;
   absoluteDomainName: string;
+  robotsNoIndex: boolean;
 }
 
 export interface RootNestedStackProps extends NestedStackProps {
